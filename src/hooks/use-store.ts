@@ -12,6 +12,7 @@ import type {
   Student,
   Conference,
   ServiceRole,
+  LinkedFolder,
 } from "@/lib/types";
 
 const DEFAULT_DATA: DashboardData = {
@@ -23,6 +24,7 @@ const DEFAULT_DATA: DashboardData = {
   students: [],
   conferences: [],
   serviceRoles: [],
+  linkedFolders: [],
 };
 
 export function useStore() {
@@ -30,6 +32,12 @@ export function useStore() {
     "academic-dashboard",
     DEFAULT_DATA
   );
+
+  // Ensure linkedFolders exists for older stored data
+  const safeData = {
+    ...data,
+    linkedFolders: data.linkedFolders ?? [],
+  };
 
   // Generic CRUD helpers
   function addItem<K extends keyof DashboardData>(
@@ -69,7 +77,7 @@ export function useStore() {
 
   // Paper-specific helpers
   const papers = {
-    list: data.papers,
+    list: safeData.papers,
     add: (paper: Omit<Paper, "id" | "createdAt" | "updatedAt">) =>
       addItem("papers", { ...paper, updatedAt: new Date().toISOString() } as never),
     update: (id: string, updates: Partial<Paper>) =>
@@ -78,21 +86,21 @@ export function useStore() {
   };
 
   const courses = {
-    list: data.courses,
+    list: safeData.courses,
     add: (course: Omit<Course, "id" | "createdAt">) => addItem("courses", course as never),
     update: (id: string, updates: Partial<Course>) => updateItem("courses", id, updates as never),
     delete: (id: string) => deleteItem("courses", id),
   };
 
   const grants = {
-    list: data.grants,
+    list: safeData.grants,
     add: (grant: Omit<Grant, "id" | "createdAt">) => addItem("grants", grant as never),
     update: (id: string, updates: Partial<Grant>) => updateItem("grants", id, updates as never),
     delete: (id: string) => deleteItem("grants", id),
   };
 
   const peerReviews = {
-    list: data.peerReviews,
+    list: safeData.peerReviews,
     add: (review: Omit<PeerReview, "id" | "createdAt">) => addItem("peerReviews", review as never),
     update: (id: string, updates: Partial<PeerReview>) =>
       updateItem("peerReviews", id, updates as never),
@@ -100,7 +108,7 @@ export function useStore() {
   };
 
   const editorialRoles = {
-    list: data.editorialRoles,
+    list: safeData.editorialRoles,
     add: (role: Omit<EditorialRole, "id">) => addItem("editorialRoles", role as never),
     update: (id: string, updates: Partial<EditorialRole>) =>
       updateItem("editorialRoles", id, updates as never),
@@ -108,14 +116,14 @@ export function useStore() {
   };
 
   const students = {
-    list: data.students,
+    list: safeData.students,
     add: (student: Omit<Student, "id" | "createdAt">) => addItem("students", student as never),
     update: (id: string, updates: Partial<Student>) => updateItem("students", id, updates as never),
     delete: (id: string) => deleteItem("students", id),
   };
 
   const conferences = {
-    list: data.conferences,
+    list: safeData.conferences,
     add: (conference: Omit<Conference, "id" | "createdAt">) =>
       addItem("conferences", conference as never),
     update: (id: string, updates: Partial<Conference>) =>
@@ -124,12 +132,21 @@ export function useStore() {
   };
 
   const serviceRoles = {
-    list: data.serviceRoles,
+    list: safeData.serviceRoles,
     add: (role: Omit<ServiceRole, "id" | "createdAt">) =>
       addItem("serviceRoles", role as never),
     update: (id: string, updates: Partial<ServiceRole>) =>
       updateItem("serviceRoles", id, updates as never),
     delete: (id: string) => deleteItem("serviceRoles", id),
+  };
+
+  const linkedFolders = {
+    list: safeData.linkedFolders,
+    add: (folder: Omit<LinkedFolder, "id" | "createdAt">) =>
+      addItem("linkedFolders", folder as never),
+    update: (id: string, updates: Partial<LinkedFolder>) =>
+      updateItem("linkedFolders", id, updates as never),
+    delete: (id: string) => deleteItem("linkedFolders", id),
   };
 
   return {
@@ -142,5 +159,6 @@ export function useStore() {
     students,
     conferences,
     serviceRoles,
+    linkedFolders,
   };
 }

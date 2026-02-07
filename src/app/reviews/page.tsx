@@ -11,9 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/ui/empty-state";
-import { ClipboardCheck, Edit, Trash2, BookOpen, Calendar } from "lucide-react";
+import { ClipboardCheck, Edit, Trash2, BookOpen, Calendar, FolderOpen } from "lucide-react";
 import { format } from "date-fns";
-import type { PeerReview, ReviewStatus, EditorialRole } from "@/lib/types";
+import type { PeerReview, ReviewStatus, EditorialRole, TrackedFile, LinkedFolder } from "@/lib/types";
+import { FileAttachments } from "@/components/files/file-attachments";
+import { FileBadgeList } from "@/components/files/file-badge-list";
 
 // ============================================
 // Constants
@@ -85,6 +87,7 @@ interface ReviewFormData {
   receivedDate: string;
   completedDate: string;
   notes: string;
+  linkedFiles: TrackedFile[];
 }
 
 const EMPTY_REVIEW_FORM: ReviewFormData = {
@@ -95,6 +98,7 @@ const EMPTY_REVIEW_FORM: ReviewFormData = {
   receivedDate: "",
   completedDate: "",
   notes: "",
+  linkedFiles: [],
 };
 
 interface EditorialFormData {
@@ -118,7 +122,7 @@ const EMPTY_EDITORIAL_FORM: EditorialFormData = {
 // ============================================
 
 export default function ReviewsPage() {
-  const { peerReviews, editorialRoles } = useDashboard();
+  const { peerReviews, editorialRoles, linkedFolders } = useDashboard();
 
   // Tab state
   const [activeTab, setActiveTab] = useState<ActiveTab>("reviews");
@@ -141,6 +145,7 @@ export default function ReviewsPage() {
 
   // ---- Derived data ----
 
+  const reviewFolders = linkedFolders.list.filter((f) => f.module === "reviews");
   const reviewsThisYear = peerReviews.list.filter(
     (r) => isCurrentYear(r.receivedDate) || isCurrentYear(r.createdAt)
   );
@@ -167,6 +172,7 @@ export default function ReviewsPage() {
       receivedDate: review.receivedDate,
       completedDate: review.completedDate,
       notes: review.notes,
+      linkedFiles: review.linkedFiles ?? [],
     });
     setIsReviewModalOpen(true);
   }
@@ -184,6 +190,7 @@ export default function ReviewsPage() {
         receivedDate: reviewForm.receivedDate,
         completedDate: reviewForm.completedDate,
         notes: reviewForm.notes.trim(),
+        linkedFiles: reviewForm.linkedFiles,
       });
     } else {
       peerReviews.add({
@@ -194,6 +201,7 @@ export default function ReviewsPage() {
         receivedDate: reviewForm.receivedDate,
         completedDate: reviewForm.completedDate,
         notes: reviewForm.notes.trim(),
+        linkedFiles: reviewForm.linkedFiles,
       });
     }
 
@@ -362,6 +370,32 @@ export default function ReviewsPage() {
               </Card>
             </div>
 
+            {/* Linked Folders for Reviews */}
+            {reviewFolders.length > 0 && (
+              <div className="rounded-lg border border-slate-200 bg-white p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <FolderOpen className="h-4 w-4 text-amber-500" />
+                  <h3 className="text-sm font-semibold text-slate-700">Linked Folders</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {reviewFolders.map((f: LinkedFolder) => (
+                    <span
+                      key={f.id}
+                      className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 border border-slate-200 px-3 py-1.5 text-sm text-slate-700"
+                    >
+                      <FolderOpen className="h-3.5 w-3.5 text-amber-500" />
+                      {f.name}
+                      {f.path && (
+                        <span className="text-xs text-slate-400 font-mono ml-1">
+                          {f.path}
+                        </span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Add Review Button */}
             <div className="flex justify-end">
               <Button onClick={openAddReview} size="md">
@@ -414,6 +448,8 @@ export default function ReviewsPage() {
                               Completed: {safeDateFormat(review.completedDate, "MMM d, yyyy")}
                             </p>
                           )}
+
+                          <FileBadgeList files={review.linkedFiles ?? []} max={2} />
 
                           {review.notes && (
                             <p className="mt-2 line-clamp-2 text-xs text-slate-500">
@@ -610,6 +646,14 @@ export default function ReviewsPage() {
             onChange={(e) =>
               setReviewForm((prev) => ({ ...prev, notes: e.target.value }))
             }
+          />
+
+          <FileAttachments
+            files={reviewForm.linkedFiles}
+            onChange={(files) =>
+              setReviewForm((prev) => ({ ...prev, linkedFiles: files }))
+            }
+            label="Manuscript PDF & Related Files"
           />
 
           <div className="flex justify-end gap-3 pt-2">

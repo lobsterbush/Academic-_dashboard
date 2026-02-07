@@ -47,6 +47,7 @@ export interface Paper {
   decisionDate: string;
   notes: string;
   priority: Priority;
+  linkedFiles: TrackedFile[];
   createdAt: string;
   updatedAt: string;
 }
@@ -102,6 +103,7 @@ export interface Grant {
   endDate: string;
   coInvestigators: string[];
   notes: string;
+  linkedFiles: TrackedFile[];
   createdAt: string;
 }
 
@@ -117,6 +119,7 @@ export interface PeerReview {
   receivedDate: string;
   completedDate: string;
   notes: string;
+  linkedFiles: TrackedFile[];
   createdAt: string;
 }
 
@@ -183,6 +186,25 @@ export interface ServiceRole {
   createdAt: string;
 }
 
+// --- Linked Folders & Files ---
+export type FolderModule = "papers" | "reviews" | "grants" | "teaching" | "conferences";
+
+export interface LinkedFolder {
+  id: string;
+  name: string;           // User-friendly label, e.g. "Review PDFs"
+  module: FolderModule;
+  path: string;           // Display path from directory picker
+  notes: string;
+  createdAt: string;
+}
+
+export interface TrackedFile {
+  name: string;
+  size: number;
+  lastModified: number;   // Unix timestamp
+  type: string;           // MIME type, e.g. "application/pdf"
+}
+
 // --- Dashboard Store ---
 export interface DashboardData {
   papers: Paper[];
@@ -193,4 +215,5 @@ export interface DashboardData {
   students: Student[];
   conferences: Conference[];
   serviceRoles: ServiceRole[];
+  linkedFolders: LinkedFolder[];
 }

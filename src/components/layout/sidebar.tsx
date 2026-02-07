@@ -13,6 +13,7 @@ import {
   Plane,
   Briefcase,
   Calendar,
+  FolderOpen,
   BookOpen,
 } from "lucide-react";
 
@@ -26,6 +27,7 @@ const navigation = [
   { name: "Conferences", href: "/conferences", icon: Plane },
   { name: "Service", href: "/service", icon: Briefcase },
   { name: "Deadlines", href: "/deadlines", icon: Calendar },
+  { name: "Workspace", href: "/workspace", icon: FolderOpen },
 ];
 
 export function Sidebar() {

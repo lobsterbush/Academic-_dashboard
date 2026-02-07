@@ -12,8 +12,10 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PAPER_STAGES } from "@/lib/types";
-import type { Paper, PaperStage, Priority } from "@/lib/types";
+import type { Paper, PaperStage, Priority, TrackedFile } from "@/lib/types";
 import { FileText, Edit, Trash2, ChevronRight } from "lucide-react";
+import { FileAttachments } from "@/components/files/file-attachments";
+import { FileBadgeList } from "@/components/files/file-badge-list";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -46,6 +48,7 @@ const EMPTY_FORM: PaperFormData = {
   decisionDate: "",
   priority: "medium",
   notes: "",
+  linkedFiles: [],
 };
 
 // ---------------------------------------------------------------------------
@@ -62,6 +65,7 @@ interface PaperFormData {
   decisionDate: string;
   priority: Priority;
   notes: string;
+  linkedFiles: TrackedFile[];
 }
 
 // ---------------------------------------------------------------------------
@@ -79,6 +83,7 @@ function paperToFormData(paper: Paper): PaperFormData {
     decisionDate: paper.decisionDate,
     priority: paper.priority,
     notes: paper.notes,
+    linkedFiles: paper.linkedFiles ?? [],
   };
 }
 
@@ -96,6 +101,7 @@ function formDataToPayload(form: PaperFormData) {
     decisionDate: form.decisionDate,
     priority: form.priority,
     notes: form.notes,
+    linkedFiles: form.linkedFiles,
   };
 }
 
@@ -256,6 +262,8 @@ export default function PapersPage() {
                             </p>
                           )}
 
+                          <FileBadgeList files={paper.linkedFiles ?? []} max={2} />
+
                           <div className="flex items-center justify-between mt-3">
                             <Badge variant={PRIORITY_BADGE_VARIANT[paper.priority]}>
                               {paper.priority.charAt(0).toUpperCase() +
@@ -373,6 +381,12 @@ export default function PapersPage() {
             placeholder="Any additional notes"
             value={form.notes}
             onChange={(e) => updateField("notes", e.target.value)}
+          />
+
+          <FileAttachments
+            files={form.linkedFiles}
+            onChange={(files) => updateField("linkedFiles", files)}
+            label="Linked Files (PDFs, drafts, data)"
           />
 
           <div className="flex justify-end gap-3 pt-2">

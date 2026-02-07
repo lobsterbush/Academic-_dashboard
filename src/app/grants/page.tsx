@@ -158,6 +158,7 @@ export default function GrantsPage() {
         .map((s) => s.trim())
         .filter(Boolean),
       notes: form.notes.trim(),
+      linkedFiles: editingGrant?.linkedFiles ?? [],
     };
 
     if (editingGrant) {
