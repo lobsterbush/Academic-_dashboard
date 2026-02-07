@@ -1,0 +1,73 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import {
+  LayoutDashboard,
+  FileText,
+  GraduationCap,
+  DollarSign,
+  ClipboardCheck,
+  Users,
+  Plane,
+  Briefcase,
+  Calendar,
+  BookOpen,
+} from "lucide-react";
+
+const navigation = [
+  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Papers", href: "/papers", icon: FileText },
+  { name: "Teaching", href: "/teaching", icon: GraduationCap },
+  { name: "Grants", href: "/grants", icon: DollarSign },
+  { name: "Reviews", href: "/reviews", icon: ClipboardCheck },
+  { name: "Students", href: "/students", icon: Users },
+  { name: "Conferences", href: "/conferences", icon: Plane },
+  { name: "Service", href: "/service", icon: Briefcase },
+  { name: "Deadlines", href: "/deadlines", icon: Calendar },
+];
+
+export function Sidebar() {
+  const pathname = usePathname();
+
+  return (
+    <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-slate-200 bg-white">
+      {/* Logo / Title */}
+      <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-6">
+        <BookOpen className="h-7 w-7 text-indigo-600" />
+        <div>
+          <h1 className="text-base font-bold text-slate-900">Academic Hub</h1>
+          <p className="text-[10px] text-slate-500 leading-none">Research & Teaching Dashboard</p>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 px-3 py-4">
+        {navigation.map((item) => {
+          const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-indigo-50 text-indigo-700"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+              )}
+            >
+              <item.icon className={cn("h-5 w-5", isActive ? "text-indigo-600" : "text-slate-400")} />
+              {item.name}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div className="border-t border-slate-200 px-6 py-3">
+        <p className="text-xs text-slate-400">Data stored locally in your browser</p>
+      </div>
+    </aside>
+  );
+}
