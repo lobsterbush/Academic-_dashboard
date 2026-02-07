@@ -15,6 +15,7 @@ import {
   Calendar,
   FolderOpen,
   BookOpen,
+  Monitor,
 } from "lucide-react";
 
 const navigation = [
@@ -30,7 +31,11 @@ const navigation = [
   { name: "Workspace", href: "/workspace", icon: FolderOpen },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onScreensaver?: () => void;
+}
+
+export function Sidebar({ onScreensaver }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -67,8 +72,17 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-slate-200 px-6 py-3">
-        <p className="text-xs text-slate-400">Data stored locally in your browser</p>
+      <div className="border-t border-slate-200 px-3 py-3 space-y-2">
+        {onScreensaver && (
+          <button
+            onClick={onScreensaver}
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+          >
+            <Monitor className="h-4 w-4" />
+            Screensaver
+          </button>
+        )}
+        <p className="px-3 text-xs text-slate-400">Data stored locally in your browser</p>
       </div>
     </aside>
   );

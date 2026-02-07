@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Sidebar } from "@/components/layout/sidebar";
-import { StoreProvider } from "@/context/store-context";
+import { AppShell } from "@/components/layout/app-shell";
 
 export const metadata: Metadata = {
   title: "Academic Hub - Research & Teaching Dashboard",
@@ -16,10 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <StoreProvider>
-          <Sidebar />
-          <main className="ml-64 min-h-screen bg-slate-50">{children}</main>
-        </StoreProvider>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
