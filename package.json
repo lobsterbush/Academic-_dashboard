@@ -2,9 +2,13 @@
   "name": "academic-dashboard",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/dist/main.js",
   "scripts": {
     "dev": "next dev",
+    "dev:electron": "concurrently --kill-others \"next dev\" \"npm run build:main && wait-on http://localhost:3000 && electron .\"",
     "build": "next build",
+    "build:main": "tsc -p electron/tsconfig.json",
+    "build:electron": "npm run build:main && next build && electron-builder --mac",
     "start": "next start",
     "lint": "next lint"
   },
@@ -23,10 +27,38 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^10.0.0",
+    "concurrently": "^9.1.0",
+    "electron": "^33.3.1",
+    "electron-builder": "^25.1.8",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^8.0.3"
+  },
+  "build": {
+    "appId": "com.academic.dashboard",
+    "productName": "Academic Dashboard",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "electron/dist/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "out",
+        "to": "out"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": ["dmg"]
+    },
+    "extraMetadata": {
+      "main": "electron/dist/main.js"
+    }
   }
 }

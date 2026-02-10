@@ -29,6 +29,10 @@ type DirectoryHandle = any;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FileEntry = any;
 
+function isElectron(): boolean {
+  return typeof window !== "undefined" && !!window.electronAPI;
+}
+
 function getFileIcon(type: string) {
   if (type === "application/pdf") return <FileText className="h-4 w-4 text-red-500" />;
   if (type.startsWith("image/")) return <Image className="h-4 w-4 text-blue-500" />;
@@ -64,9 +68,40 @@ export function FolderBrowser({
   const [scannedFiles, setScannedFiles] = useState<TrackedFile[]>([]);
   const [folderName, setFolderName] = useState(currentFolderName ?? "");
   const [error, setError] = useState("");
+  // Browser: stores a DirectoryHandle for rescanning
   const [dirHandle, setDirHandle] = useState<DirectoryHandle | null>(null);
+  // Electron: stores a path string for rescanning
+  const [dirPath, setDirPath] = useState<string | null>(null);
 
-  const scanDirectory = useCallback(
+  // Scan using Electron IPC
+  const scanDirectoryElectron = useCallback(
+    async (folderPath: string) => {
+      setScanning(true);
+      setError("");
+      try {
+        const files = await window.electronAPI!.fs.readDirectory(folderPath);
+        const tracked: TrackedFile[] = files.map((f) => ({
+          name: f.name,
+          size: f.size,
+          lastModified: f.lastModified,
+          type: f.type,
+        }));
+        setScannedFiles(tracked);
+        const name = folderPath.split("/").pop() || folderPath;
+        setFolderName(name);
+        onFolderScanned(name, tracked);
+      } catch (err) {
+        setError("Failed to scan folder. Please try again.");
+        console.error(err);
+      } finally {
+        setScanning(false);
+      }
+    },
+    [onFolderScanned]
+  );
+
+  // Scan using Web File System Access API (browser fallback)
+  const scanDirectoryBrowser = useCallback(
     async (handle: DirectoryHandle) => {
       setScanning(true);
       setError("");
@@ -89,9 +124,7 @@ export function FolderBrowser({
           }
         }
 
-        // Sort by last modified descending (most recent first)
         files.sort((a, b) => b.lastModified - a.lastModified);
-
         setScannedFiles(files);
         setFolderName(handle.name);
         onFolderScanned(handle.name, files);
@@ -106,35 +139,51 @@ export function FolderBrowser({
   );
 
   async function handlePickFolder() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w = window as any;
-    if (!w.showDirectoryPicker) {
-      setError(
-        "Your browser doesn't support folder access. Use Chrome, Edge, or Opera for this feature."
-      );
-      return;
-    }
-
-    try {
-      const handle = await w.showDirectoryPicker({ mode: "read" });
-      setDirHandle(handle);
-      await scanDirectory(handle);
-    } catch (err) {
-      // User cancelled the picker — not an error
-      if ((err as Error).name !== "AbortError") {
+    if (isElectron()) {
+      try {
+        const selectedPath = await window.electronAPI!.dialog.openDirectory();
+        if (!selectedPath) return;
+        setDirPath(selectedPath);
+        await scanDirectoryElectron(selectedPath);
+      } catch (err) {
         setError("Could not access the folder. Please check permissions.");
+        console.error(err);
+      }
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const w = window as any;
+      if (!w.showDirectoryPicker) {
+        setError(
+          "Your browser doesn't support folder access. Use Chrome, Edge, or Opera for this feature."
+        );
+        return;
+      }
+
+      try {
+        const handle = await w.showDirectoryPicker({ mode: "read" });
+        setDirHandle(handle);
+        await scanDirectoryBrowser(handle);
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          setError("Could not access the folder. Please check permissions.");
+        }
       }
     }
   }
 
   async function handleRescan() {
-    if (dirHandle) {
-      await scanDirectory(dirHandle);
+    if (isElectron() && dirPath) {
+      await scanDirectoryElectron(dirPath);
+    } else if (dirHandle) {
+      await scanDirectoryBrowser(dirHandle);
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const isSupported = typeof window !== "undefined" && !!(window as any).showDirectoryPicker;
+  const hasHandle = isElectron() ? !!dirPath : !!dirHandle;
+  const isSupported =
+    isElectron() ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (typeof window !== "undefined" && !!(window as any).showDirectoryPicker);
 
   return (
     <div className="space-y-3">
@@ -150,7 +199,7 @@ export function FolderBrowser({
           {folderName || buttonLabel}
         </Button>
 
-        {dirHandle && (
+        {hasHandle && (
           <Button
             type="button"
             variant="ghost"

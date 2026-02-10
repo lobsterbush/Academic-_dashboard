@@ -84,7 +84,7 @@ export function Sidebar({ onScreensaver }: SidebarProps) {
             Screensaver
           </button>
         )}
-        <p className="px-3 text-xs text-slate-400 dark:text-slate-500">Data stored locally in your browser</p>
+        <p className="px-3 text-xs text-slate-400 dark:text-slate-500">Data stored locally on your machine</p>
       </div>
     </aside>
   );

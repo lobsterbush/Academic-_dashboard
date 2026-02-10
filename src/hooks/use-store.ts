@@ -13,6 +13,7 @@ import type {
   Conference,
   ServiceRole,
   LinkedFolder,
+  Todo,
 } from "@/lib/types";
 
 const DEFAULT_DATA: DashboardData = {
@@ -25,6 +26,7 @@ const DEFAULT_DATA: DashboardData = {
   conferences: [],
   serviceRoles: [],
   linkedFolders: [],
+  todos: [],
 };
 
 export function useStore() {
@@ -33,10 +35,11 @@ export function useStore() {
     DEFAULT_DATA
   );
 
-  // Ensure linkedFolders exists for older stored data
+  // Ensure newer collections exist for older stored data
   const safeData = {
     ...data,
     linkedFolders: data.linkedFolders ?? [],
+    todos: data.todos ?? [],
   };
 
   // Generic CRUD helpers
@@ -149,6 +152,13 @@ export function useStore() {
     delete: (id: string) => deleteItem("linkedFolders", id),
   };
 
+  const todos = {
+    list: safeData.todos,
+    add: (todo: Omit<Todo, "id" | "createdAt">) => addItem("todos", todo as never),
+    update: (id: string, updates: Partial<Todo>) => updateItem("todos", id, updates as never),
+    delete: (id: string) => deleteItem("todos", id),
+  };
+
   return {
     isHydrated,
     papers,
@@ -160,5 +170,6 @@ export function useStore() {
     conferences,
     serviceRoles,
     linkedFolders,
+    todos,
   };
 }

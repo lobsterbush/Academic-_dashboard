@@ -225,6 +225,14 @@ export const DEFAULT_SETTINGS: UserSettings = {
   screensaverTimeout: 5,
 };
 
+// --- Todos ---
+export interface Todo {
+  id: string;
+  text: string;
+  completed: boolean;
+  createdAt: string;
+}
+
 // --- Linked Folders & Files ---
 export type FolderModule = "papers" | "reviews" | "grants" | "teaching" | "conferences";
 
@@ -255,4 +263,5 @@ export interface DashboardData {
   conferences: Conference[];
   serviceRoles: ServiceRole[];
   linkedFolders: LinkedFolder[];
+  todos: Todo[];
 }
