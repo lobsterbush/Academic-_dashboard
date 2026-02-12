@@ -144,7 +144,7 @@ export function Screensaver({ onDismiss }: ScreensaverProps) {
       (g) => g.status === "drafting" || g.status === "submitted" || g.status === "under-review"
     );
     if (grants.list.length > 0) {
-      const totalFunded = fundedGrants.reduce((s, g) => s + g.amount, 0);
+      const pendingDeliverables = grants.list.filter(g => g.nextDeliverable && g.nextDeliverableDate).length;
       result.push({
         id: "grants",
         render: () => (
@@ -158,8 +158,8 @@ export function Screensaver({ onDismiss }: ScreensaverProps) {
                 value: fundedGrants.length,
               },
               {
-                label: "Total Funded",
-                value: totalFunded > 0 ? `$${(totalFunded / 1000).toFixed(0)}K` : "$0",
+                label: "Deliverables",
+                value: pendingDeliverables,
               },
               { label: "Pending", value: activeGrants.length },
             ]}
@@ -271,16 +271,16 @@ export function Screensaver({ onDismiss }: ScreensaverProps) {
                 days < 0
                   ? "OVERDUE"
                   : days === 0
-                  ? "TODAY"
-                  : days <= 7
-                  ? `${days}d`
-                  : format(dl.date, "MMM d");
+                    ? "TODAY"
+                    : days <= 7
+                      ? `${days}d`
+                      : format(dl.date, "MMM d");
               const color =
                 days < 0
                   ? "bg-red-500/20 text-red-300"
                   : days <= 7
-                  ? "bg-amber-500/20 text-amber-300"
-                  : "bg-slate-500/20 text-slate-300";
+                    ? "bg-amber-500/20 text-amber-300"
+                    : "bg-slate-500/20 text-slate-300";
               return {
                 primary: dl.label,
                 secondary: dl.module,
@@ -353,9 +353,8 @@ export function Screensaver({ onDismiss }: ScreensaverProps) {
 
       {/* Content */}
       <div
-        className={`relative z-10 w-full max-w-2xl px-8 transition-all duration-500 ${
-          fade ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-        }`}
+        className={`relative z-10 w-full max-w-2xl px-8 transition-all duration-500 ${fade ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          }`}
       >
         {activePanel?.render()}
       </div>
@@ -365,9 +364,8 @@ export function Screensaver({ onDismiss }: ScreensaverProps) {
         {panels.map((panel, i) => (
           <div
             key={panel.id}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === activeIndex ? "w-6 bg-white/60" : "w-1.5 bg-white/20"
-            }`}
+            className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? "w-6 bg-white/60" : "w-1.5 bg-white/20"
+              }`}
           />
         ))}
       </div>

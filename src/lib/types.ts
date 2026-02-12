@@ -95,12 +95,14 @@ export interface Grant {
   id: string;
   title: string;
   agency: string;
-  amount: number;
+  // amount: number; // Removed per user request
   role: string; // PI, Co-PI, etc.
   status: GrantStatus;
-  submissionDeadline: string;
+  submissionDeadline: string; // For applications
   startDate: string;
   endDate: string;
+  nextDeliverable?: string; // e.g. "Annual Report"
+  nextDeliverableDate?: string;
   coInvestigators: string[];
   notes: string;
   linkedFiles: TrackedFile[];
@@ -216,6 +218,12 @@ export interface UserSettings {
   accentColor: AccentColor;
   visiblePanes: DashboardPane[];
   screensaverTimeout: number; // minutes, 0 = disabled
+  googleScholarUrl?: string; // e.g. "https://scholar.google.com/citations?user=uLty40oAAAAJ&hl=en"
+  scholarStats?: {
+    citationCount: number;
+    hIndex: number;
+    lastUpdated: string; // ISO date string
+  };
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {

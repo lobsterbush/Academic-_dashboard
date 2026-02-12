@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useRef, KeyboardEvent } from "react";
 import { useDashboard } from "@/context/store-context";
+import { useUserSettings } from "@/context/settings-context";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/page-header";
 import {
@@ -254,36 +255,29 @@ function ColumnShell({
 
 function PaperCard({ paper }: { paper: Paper }) {
   return (
-    <div className="rounded-lg border border-slate-150 bg-white px-4 py-3 shadow-sm transition-colors hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600">
-      <div className="flex items-start gap-2">
+    <div className="rounded-lg border border-slate-150 bg-white px-4 py-2 shadow-sm transition-colors hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600">
+      <div className="flex items-center gap-2">
         <span
-          className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${PRIORITY_DOT[paper.priority]}`}
+          className={`h-2 w-2 shrink-0 rounded-full ${PRIORITY_DOT[paper.priority]}`}
           title={`${paper.priority} priority`}
         />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium leading-snug text-slate-800 dark:text-slate-200">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">
             {paper.title}
           </p>
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-2">
+            {paper.targetJournal && (
+              <span className="hidden text-xs text-slate-500 dark:text-slate-400 sm:inline-block">
+                ({paper.targetJournal})
+              </span>
+            )}
             <Badge
               variant={STAGE_BADGE_VARIANT[paper.stage]}
-              className="text-[10px]"
+              className="px-1.5 py-0 text-[10px]"
             >
               {STAGE_LABELS[paper.stage]}
             </Badge>
-            {paper.targetJournal && (
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                {paper.targetJournal}
-              </span>
-            )}
           </div>
-          {paper.coAuthors.length > 0 && (
-            <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-              w/ {paper.coAuthors.slice(0, 3).join(", ")}
-              {paper.coAuthors.length > 3 &&
-                ` +${paper.coAuthors.length - 3}`}
-            </p>
-          )}
         </div>
       </div>
     </div>
@@ -360,20 +354,18 @@ function TodoItem({
     <div className="group flex items-center gap-2 rounded-lg border border-slate-150 bg-white px-3 py-2 shadow-sm transition-colors hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600">
       <button
         onClick={onToggle}
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${
-          todo.completed
-            ? "border-emerald-400 bg-emerald-100 text-emerald-600 dark:border-emerald-600 dark:bg-emerald-900 dark:text-emerald-400"
-            : "border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500"
-        }`}
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors ${todo.completed
+          ? "border-emerald-400 bg-emerald-100 text-emerald-600 dark:border-emerald-600 dark:bg-emerald-900 dark:text-emerald-400"
+          : "border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500"
+          }`}
       >
         {todo.completed && <Check className="h-3 w-3" />}
       </button>
       <span
-        className={`flex-1 text-sm ${
-          todo.completed
-            ? "text-slate-400 line-through dark:text-slate-500"
-            : "text-slate-800 dark:text-slate-200"
-        }`}
+        className={`flex-1 text-sm ${todo.completed
+          ? "text-slate-400 line-through dark:text-slate-500"
+          : "text-slate-800 dark:text-slate-200"
+          }`}
       >
         {todo.text}
       </span>
@@ -440,6 +432,56 @@ function AddTodoInput({ onAdd }: { onAdd: (text: string) => void }) {
 
 export default function DashboardPage() {
   const { isHydrated, papers, conferences, students, todos } = useDashboard();
+  const { settings, updateSettings } = useUserSettings();
+
+  // --- Scholar Stats Effect ---
+  const [isLoadingScholar, setIsLoadingScholar] = useState(false);
+
+  // We use a ref to track if we've attempted a fetch in this session to prevent loops
+  const hasAttemptedFetch = useRef(false);
+
+  // Use useMemo as a side-effect trigger or just simple conditional logic inside render is dangerous.
+  // We'll use a standard pattern: check condition, trigger async action if needed.
+  // Since we can't use useEffect directly inside a conditional, we use it at top level.
+
+  const googleScholarUrl = settings.googleScholarUrl;
+  const lastUpdated = settings.scholarStats?.lastUpdated;
+
+  if (isHydrated && googleScholarUrl && !isLoadingScholar && !hasAttemptedFetch.current) {
+    const oneDay = 24 * 60 * 60 * 1000;
+    const now = new Date();
+    const needsUpdate = !lastUpdated || (now.getTime() - new Date(lastUpdated).getTime() > oneDay);
+
+    if (needsUpdate) {
+      hasAttemptedFetch.current = true;
+      Promise.resolve().then(async () => {
+        setIsLoadingScholar(true);
+        try {
+          // Check if running in Electron with exposed API
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const api = (window as any).electronAPI;
+          if (api?.scholar?.fetchStats) {
+            const data = await api.scholar.fetchStats(googleScholarUrl);
+            if (data.citationCount !== undefined) {
+              updateSettings({
+                scholarStats: {
+                  citationCount: data.citationCount,
+                  hIndex: data.hIndex,
+                  lastUpdated: new Date().toISOString(),
+                },
+              });
+            }
+          } else {
+            console.warn("Scholar API not available (not running in Electron?)");
+          }
+        } catch (err) {
+          console.error("Failed to update scholar stats", err);
+        } finally {
+          setIsLoadingScholar(false);
+        }
+      });
+    }
+  }
 
   // --- Top row: Paper columns ---
   const paperColumnData = useMemo(() => {
@@ -500,6 +542,17 @@ export default function DashboardPage() {
             active paper{totalActive !== 1 ? "s" : ""}
           </span>
           <span className="text-slate-300 dark:text-slate-600">|</span>
+          {settings.scholarStats && (
+            <>
+              <span className="flex items-center gap-1.5">
+                <span className="font-semibold text-slate-800 dark:text-slate-200">
+                  {settings.scholarStats.citationCount}
+                </span>{" "}
+                citations
+              </span>
+              <span className="text-slate-300 dark:text-slate-600">|</span>
+            </>
+          )}
           {PAPER_COLUMNS.map((col) => (
             <span key={col.key}>
               <span className="font-medium text-slate-700 dark:text-slate-300">
@@ -605,6 +658,6 @@ export default function DashboardPage() {
           </ColumnShell>
         </div>
       </div>
-    </div>
+    </div >
   );
 }

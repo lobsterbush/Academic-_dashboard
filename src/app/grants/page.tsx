@@ -34,14 +34,14 @@ function statusLabel(status: GrantStatus): string {
   return GRANT_STATUSES.find((s) => s.value === status)?.label ?? status;
 }
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+// function formatCurrency(amount: number): string {
+//   return new Intl.NumberFormat("en-US", {
+//     style: "currency",
+//     currency: "USD",
+//     minimumFractionDigits: 0,
+//     maximumFractionDigits: 0,
+//   }).format(amount);
+// }
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return "";
@@ -59,12 +59,14 @@ function formatDate(dateStr: string): string {
 interface GrantFormData {
   title: string;
   agency: string;
-  amount: string;
+  // amount: string;
   role: string;
   status: GrantStatus;
   submissionDeadline: string;
   startDate: string;
   endDate: string;
+  nextDeliverable: string;
+  nextDeliverableDate: string;
   coInvestigators: string;
   notes: string;
 }
@@ -72,12 +74,14 @@ interface GrantFormData {
 const EMPTY_FORM: GrantFormData = {
   title: "",
   agency: "",
-  amount: "",
+  // amount: "",
   role: "",
   status: "planning",
   submissionDeadline: "",
   startDate: "",
   endDate: "",
+  nextDeliverable: "",
+  nextDeliverableDate: "",
   coInvestigators: "",
   notes: "",
 };
@@ -94,10 +98,6 @@ export default function GrantsPage() {
 
   // ---- Derived stats -------------------------------------------------------
 
-  const totalFunded = grants.list
-    .filter((g) => g.status === "funded")
-    .reduce((sum, g) => sum + g.amount, 0);
-
   const activeApplications = grants.list.filter(
     (g) => g.status === "submitted" || g.status === "under-review"
   ).length;
@@ -109,6 +109,8 @@ export default function GrantsPage() {
     (g) => g.status === "funded" || g.status === "completed"
   ).length;
   const successRate = decided.length > 0 ? Math.round((successCount / decided.length) * 100) : 0;
+
+  const upcomingDeliverables = grants.list.filter(g => g.nextDeliverable && g.nextDeliverableDate).length;
 
   // ---- Modal helpers -------------------------------------------------------
 
@@ -123,12 +125,14 @@ export default function GrantsPage() {
     setForm({
       title: grant.title,
       agency: grant.agency,
-      amount: String(grant.amount),
+      // amount: String(grant.amount),
       role: grant.role,
       status: grant.status,
       submissionDeadline: grant.submissionDeadline,
       startDate: grant.startDate,
       endDate: grant.endDate,
+      nextDeliverable: grant.nextDeliverable || "",
+      nextDeliverableDate: grant.nextDeliverableDate || "",
       coInvestigators: grant.coInvestigators.join(", "),
       notes: grant.notes,
     });
@@ -147,12 +151,14 @@ export default function GrantsPage() {
     const payload: Omit<Grant, "id" | "createdAt"> = {
       title: form.title.trim(),
       agency: form.agency.trim(),
-      amount: Number(form.amount) || 0,
+      // amount: Number(form.amount) || 0,
       role: form.role.trim(),
       status: form.status,
       submissionDeadline: form.submissionDeadline,
       startDate: form.startDate,
       endDate: form.endDate,
+      nextDeliverable: form.nextDeliverable.trim(),
+      nextDeliverableDate: form.nextDeliverableDate,
       coInvestigators: form.coInvestigators
         .split(",")
         .map((s) => s.trim())
@@ -185,9 +191,9 @@ export default function GrantsPage() {
   return (
     <div className="flex flex-col h-full">
       <PageHeader
-        icon={DollarSign}
-        title="Grants"
-        description="Track funding applications and active awards"
+        icon={Calendar}
+        title="Grants & Applications"
+        description="Track funding deadlines and deliverables"
         actionLabel="Add Grant"
         onAction={openAddModal}
       />
@@ -199,13 +205,13 @@ export default function GrantsPage() {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-500">Total Funded</p>
+                  <p className="text-sm font-medium text-slate-500">Upcoming Deliverables</p>
                   <p className="mt-1 text-2xl font-bold text-slate-900">
-                    {formatCurrency(totalFunded)}
+                    {upcomingDeliverables}
                   </p>
                 </div>
-                <div className="rounded-lg bg-emerald-50 p-3">
-                  <DollarSign className="h-6 w-6 text-emerald-600" />
+                <div className="rounded-lg bg-indigo-50 p-3">
+                  <Calendar className="h-6 w-6 text-indigo-600" />
                 </div>
               </div>
             </CardContent>
@@ -218,8 +224,8 @@ export default function GrantsPage() {
                   <p className="text-sm font-medium text-slate-500">Active Applications</p>
                   <p className="mt-1 text-2xl font-bold text-slate-900">{activeApplications}</p>
                 </div>
-                <div className="rounded-lg bg-amber-50 p-3">
-                  <Calendar className="h-6 w-6 text-amber-600" />
+                <div className="rounded-lg bg-orange-50 p-3">
+                  <Calendar className="h-6 w-6 text-orange-600" />
                 </div>
               </div>
             </CardContent>
@@ -234,8 +240,8 @@ export default function GrantsPage() {
                     {decided.length > 0 ? `${successRate}%` : "N/A"}
                   </p>
                 </div>
-                <div className="rounded-lg bg-indigo-50 p-3">
-                  <Building2 className="h-6 w-6 text-indigo-600" />
+                <div className="rounded-lg bg-emerald-50 p-3">
+                  <Badge className="h-6 w-6 text-emerald-600" variant="outline">%</Badge>
                 </div>
               </div>
             </CardContent>
@@ -247,7 +253,7 @@ export default function GrantsPage() {
           <EmptyState
             icon={DollarSign}
             title="No grants yet"
-            description="Start tracking your funding applications and active awards."
+            description="Start tracking your funding applications and deliverables."
             actionLabel="Add Grant"
             onAction={openAddModal}
           />
@@ -275,11 +281,14 @@ export default function GrantsPage() {
 
                     {/* Amount & Role */}
                     <div className="flex items-center gap-4 text-sm">
-                      <span className="font-semibold text-slate-900">
-                        {formatCurrency(grant.amount)}
-                      </span>
                       {grant.role && (
                         <Badge variant="outline">{grant.role}</Badge>
+                      )}
+                      {grant.nextDeliverable && (
+                        <div className="flex items-center gap-1.5 text-orange-600 font-medium">
+                          <Calendar className="h-3.5 w-3.5" />
+                          <span>Next: {grant.nextDeliverable} {grant.nextDeliverableDate && `(${formatDate(grant.nextDeliverableDate)})`}</span>
+                        </div>
                       )}
                     </div>
 
@@ -366,24 +375,16 @@ export default function GrantsPage() {
           />
 
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              id="grant-amount"
-              label="Amount ($)"
-              type="number"
-              min="0"
-              placeholder="0"
-              required
-              value={form.amount}
-              onChange={(e) => updateField("amount", e.target.value)}
-            />
-
-            <Input
-              id="grant-role"
-              label="Role"
-              placeholder="PI, Co-PI, etc."
-              value={form.role}
-              onChange={(e) => updateField("role", e.target.value)}
-            />
+            {/* Removed Amount Input */}
+            <div className="col-span-2">
+              <Input
+                id="grant-role"
+                label="Role"
+                placeholder="PI, Co-PI, etc."
+                value={form.role}
+                onChange={(e) => updateField("role", e.target.value)}
+              />
+            </div>
           </div>
 
           <Select
@@ -427,6 +428,22 @@ export default function GrantsPage() {
             value={form.coInvestigators}
             onChange={(e) => updateField("coInvestigators", e.target.value)}
           />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              id="grant-next-deliverable"
+              label="Next Deliverable (e.g. Annual Report)"
+              value={form.nextDeliverable}
+              onChange={(e) => updateField("nextDeliverable", e.target.value)}
+            />
+            <Input
+              id="grant-next-deliverable-date"
+              label="Deliverable Deadline"
+              type="date"
+              value={form.nextDeliverableDate}
+              onChange={(e) => updateField("nextDeliverableDate", e.target.value)}
+            />
+          </div>
 
           <Textarea
             id="grant-notes"

@@ -18,4 +18,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
       { name: string; size: number; lastModified: number; type: string }[]
     > => ipcRenderer.invoke("fs:readDirectory", { dirPath }),
   },
+  scholar: {
+    fetchStats: (url: string): Promise<{ citationCount: number; hIndex: number }> =>
+      ipcRenderer.invoke("scholar:fetch", { url }),
+  },
 });

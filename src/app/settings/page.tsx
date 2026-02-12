@@ -42,6 +42,7 @@ export default function SettingsPage() {
     isPaneVisible,
     setScreensaverTimeout,
     resetToDefaults,
+    updateSettings,
   } = useUserSettings();
 
   return (
@@ -53,6 +54,31 @@ export default function SettingsPage() {
       />
 
       <div className="space-y-6 p-8">
+        {/* Scholar Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Google Scholar</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
+              Enter your Google Scholar profile URL to track citations (updates daily).
+              <br />
+              <span className="text-xs italic">Example: https://scholar.google.com/citations?user=uLty40oAAAAJ&hl=en</span>
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                placeholder="https://scholar.google.com/citations?user=..."
+                value={settings.googleScholarUrl || ""}
+                onChange={(e) => {
+                  updateSettings({ googleScholarUrl: e.target.value });
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Theme */}
         <Card>
           <CardHeader>

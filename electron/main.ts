@@ -165,6 +165,50 @@ function registerIPC(): void {
       return files.sort((a, b) => b.lastModified - a.lastModified);
     }
   );
+
+  ipcMain.handle("scholar:fetch", async (_event, { url }: { url: string }) => {
+    try {
+      if (!url || !url.includes("scholar.google.com")) {
+        throw new Error("Invalid Google Scholar URL");
+      }
+
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Scholar fetch failed: ${response.statusText}`);
+      }
+
+      const html = await response.text();
+
+      // Use regex to find <td class="gsc_rsb_std">NUMBER</td>
+      // The first match is "All Citations"
+      // The h-index is the 3rd match (index 2)
+      const matches = html.match(/<td class="gsc_rsb_std">(\d+)<\/td>/g);
+
+      if (!matches || matches.length < 3) {
+        // Return zeros if parsing fails instead of blowing up
+        return { citationCount: 0, hIndex: 0 };
+      }
+
+      const extractNumber = (str: string) => {
+        const match = str.match(/<td class="gsc_rsb_std">(\d+)<\/td>/);
+        return match ? parseInt(match[1], 10) : 0;
+      };
+
+      const citationCount = extractNumber(matches[0]);
+      const hIndex = extractNumber(matches[2]);
+
+      return { citationCount, hIndex };
+    } catch (error) {
+      console.error("Scholar IPC Error:", error);
+      return { citationCount: 0, hIndex: 0 };
+    }
+  });
 }
 
 // ============================================
