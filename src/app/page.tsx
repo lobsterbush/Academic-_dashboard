@@ -25,31 +25,6 @@ import type { Paper, PaperStage, Conference, Student, Todo } from "@/lib/types";
 // Helpers
 // ============================================
 
-const STAGE_LABELS: Record<PaperStage, string> = {
-  idea: "Idea",
-  drafting: "Drafting",
-  "internal-review": "Internal Review",
-  submitted: "Submitted",
-  "under-review": "Under Review",
-  "revise-resubmit": "Revise & Resubmit",
-  accepted: "Accepted",
-  published: "Published",
-};
-
-const STAGE_BADGE_VARIANT: Record<
-  PaperStage,
-  "default" | "success" | "warning" | "danger" | "info" | "outline"
-> = {
-  idea: "outline",
-  drafting: "default",
-  "internal-review": "info",
-  submitted: "warning",
-  "under-review": "warning",
-  "revise-resubmit": "danger",
-  accepted: "success",
-  published: "success",
-};
-
 const PRIORITY_DOT: Record<string, string> = {
   urgent: "bg-red-500",
   high: "bg-orange-400",
@@ -261,24 +236,9 @@ function PaperCard({ paper }: { paper: Paper }) {
           className={`h-2 w-2 shrink-0 rounded-full ${PRIORITY_DOT[paper.priority]}`}
           title={`${paper.priority} priority`}
         />
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">
-            {paper.title}
-          </p>
-          <div className="flex shrink-0 items-center gap-2">
-            {paper.targetJournal && (
-              <span className="hidden text-xs text-slate-500 dark:text-slate-400 sm:inline-block">
-                ({paper.targetJournal})
-              </span>
-            )}
-            <Badge
-              variant={STAGE_BADGE_VARIANT[paper.stage]}
-              className="px-1.5 py-0 text-[10px]"
-            >
-              {STAGE_LABELS[paper.stage]}
-            </Badge>
-          </div>
-        </div>
+        <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200 flex-1">
+          {paper.title}
+        </p>
       </div>
     </div>
   );
