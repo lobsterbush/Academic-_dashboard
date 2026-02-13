@@ -20,41 +20,47 @@ export async function processMagicImport(
 
 async function processWithGemini(text: string, apiKey: string): Promise<MagicImportResult> {
     const prompt = getImportPrompt(text);
+    const models = ["gemini-3-flash", "gemini-1.5-flash", "gemini-1.5-flash-latest"];
+    let lastError = "";
 
-    try {
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                }),
+    for (const model of models) {
+        try {
+            const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                const err = await response.json();
+                lastError = err.error?.message || "Gemini API error";
+                continue; // Try next model
             }
-        );
 
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error?.message || "Gemini API error");
-        }
+            const json = await response.json();
+            let resultText = json.candidates[0].content.parts[0].text;
 
-        const json = await response.json();
-        let resultText = json.candidates[0].content.parts[0].text;
-
-        // Clean up markdown code blocks if present
-        if (resultText.includes("```")) {
-            const match = resultText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-            if (match) {
-                resultText = match[1];
+            if (resultText.includes("```")) {
+                const match = resultText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+                if (match) {
+                    resultText = match[1];
+                }
             }
-        }
 
-        const parsed = JSON.parse(resultText.trim());
-        return parsed as MagicImportResult;
-    } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : "Internal Server Error";
-        return { type: "unknown", error: message };
+            const parsed = JSON.parse(resultText.trim());
+            return parsed as MagicImportResult;
+        } catch (error: unknown) {
+            lastError = error instanceof Error ? error.message : "Internal Server Error";
+            continue;
+        }
     }
+
+    return { type: "unknown", error: `Gemini failed after trying multiple models. Last error: ${lastError}` };
 }
 
 async function processWithOpenAI(text: string, apiKey: string): Promise<MagicImportResult> {
