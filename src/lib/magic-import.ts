@@ -30,7 +30,7 @@ async function processWithGemini(text: string, apiKey: string): Promise<MagicImp
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
                     generationConfig: {
-                        response_mime_type: "application/json",
+                        responseMimeType: "application/json",
                     }
                 }),
             }
