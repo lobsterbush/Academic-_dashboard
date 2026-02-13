@@ -23,15 +23,12 @@ async function processWithGemini(text: string, apiKey: string): Promise<MagicImp
 
     try {
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1/models/gemini-3-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                    }
                 }),
             }
         );
@@ -42,9 +39,17 @@ async function processWithGemini(text: string, apiKey: string): Promise<MagicImp
         }
 
         const json = await response.json();
-        const resultText = json.candidates[0].content.parts[0].text;
-        const parsed = JSON.parse(resultText);
+        let resultText = json.candidates[0].content.parts[0].text;
 
+        // Clean up markdown code blocks if present
+        if (resultText.includes("```")) {
+            const match = resultText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+            if (match) {
+                resultText = match[1];
+            }
+        }
+
+        const parsed = JSON.parse(resultText.trim());
         return parsed as MagicImportResult;
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "Internal Server Error";
@@ -100,7 +105,14 @@ function getImportPrompt(text: string): string {
     Fields for grant: title, agency, submissionDeadline (YYYY-MM-DD), status ("planning")
     Fields for paper: title, targetJournal, stage ("submitted" | "under-review" | "revise-resubmit" | "accepted")
     
-    Only return the JSON. If you cannot determine the type, return {"type": "unknown", "error": "Could not identify the content type"}.
+    Only return a valid JSON object. Do not include any explanations, preamble, or markdown formatting outside the JSON itself.
+    If you cannot determine the type, return {"type": "unknown", "error": "Could not identify the content type"}.
+    
+    JSON format to follow:
+    {
+      "type": "peer-review" | "grant" | "paper",
+      "data": { ... }
+    }
     
     Input Text:
     \"\"\"
