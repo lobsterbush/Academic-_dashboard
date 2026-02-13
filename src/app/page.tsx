@@ -204,8 +204,8 @@ function PaperCard({ paper }: { paper: Paper }) {
     <div className="rounded-lg border border-slate-150 bg-white px-4 py-2 shadow-sm transition-colors hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600">
       <div className="flex items-center gap-2">
         <span
-          className={`h-2 w-2 shrink-0 rounded-full ${PRIORITY_DOT[paper.priority]}`}
-          title={`${paper.priority} priority`}
+          className={`h-2 w-2 shrink-0 rounded-full ${PRIORITY_DOT[paper.priority ?? "medium"]}`}
+          title={`${paper.priority ?? "medium"} priority`}
         />
         <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200 flex-1">
           {paper.title}

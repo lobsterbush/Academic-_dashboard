@@ -76,13 +76,13 @@ function paperToFormData(paper: Paper): PaperFormData {
   return {
     title: paper.title,
     abstract: paper.abstract,
-    coAuthors: paper.coAuthors.join(", "),
+    coAuthors: (paper.coAuthors ?? []).join(", "),
     stage: paper.stage,
-    targetJournal: paper.targetJournal,
-    submissionDate: paper.submissionDate,
-    decisionDate: paper.decisionDate,
-    priority: paper.priority,
-    notes: paper.notes,
+    targetJournal: paper.targetJournal ?? "",
+    submissionDate: paper.submissionDate ?? "",
+    decisionDate: paper.decisionDate ?? "",
+    priority: paper.priority ?? "medium",
+    notes: paper.notes ?? "",
     linkedFiles: paper.linkedFiles ?? [],
   };
 }
@@ -256,18 +256,18 @@ export default function PapersPage() {
                             </p>
                           )}
 
-                          {paper.coAuthors.length > 0 && (
+                          {(paper.coAuthors ?? []).length > 0 && (
                             <p className="text-xs text-slate-500 mt-1 truncate">
-                              {paper.coAuthors.join(", ")}
+                              {(paper.coAuthors ?? []).join(", ")}
                             </p>
                           )}
 
                           <FileBadgeList files={paper.linkedFiles ?? []} max={2} />
 
                           <div className="flex items-center justify-between mt-3">
-                            <Badge variant={PRIORITY_BADGE_VARIANT[paper.priority]}>
-                              {paper.priority.charAt(0).toUpperCase() +
-                                paper.priority.slice(1)}
+                            <Badge variant={PRIORITY_BADGE_VARIANT[paper.priority ?? "medium"]}>
+                              {(paper.priority ?? "medium").charAt(0).toUpperCase() +
+                                (paper.priority ?? "medium").slice(1)}
                             </Badge>
 
                             <div className="flex items-center gap-1">

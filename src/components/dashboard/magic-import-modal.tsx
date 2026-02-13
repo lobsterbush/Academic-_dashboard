@@ -94,8 +94,10 @@ export function MagicImportModal({ isOpen, onClose }: MagicImportModalProps) {
                 targetJournal: data.targetJournal || "",
                 stage: data.stage || "drafting",
                 priority: "medium",
-                abstract: "",
-                authors: [],
+                abstract: data.abstract || "",
+                coAuthors: data.coAuthors || [],
+                submissionDate: data.submissionDate || "",
+                decisionDate: data.decisionDate || "",
                 notes: "Imported via Magic Import",
                 linkedFiles: [],
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -108,8 +108,8 @@ function getImportPrompt(text: string): string {
     }
     
     Fields for peer-review: journal, manuscriptTitle, manuscriptId, dueDate (YYYY-MM-DD), status ("invited")
-    Fields for grant: title, agency, submissionDeadline (YYYY-MM-DD), status ("planning")
-    Fields for paper: title, targetJournal, stage ("submitted" | "under-review" | "revise-resubmit" | "accepted")
+    Fields for grant: title, agency, submissionDeadline (YYYY-MM-DD), role ("PI" | "Co-PI"), status ("planning")
+    Fields for paper: title, targetJournal, coAuthors (array of strings), abstract, stage ("drafting" | "submitted" | "under-review" | "revise-resubmit" | "accepted")
     
     Only return a valid JSON object. Do not include any explanations, preamble, or markdown formatting outside the JSON itself.
     If you cannot determine the type, return {"type": "unknown", "error": "Could not identify the content type"}.
