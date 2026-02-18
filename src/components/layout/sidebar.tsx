@@ -41,13 +41,13 @@ export function Sidebar({ onScreensaver }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+    <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-[var(--border)] bg-white/95 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/95">
       {/* Logo / Title */}
-      <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-6 dark:border-slate-700">
-        <BookOpen className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
+      <div className="flex h-16 items-center gap-2 border-b border-[var(--border)] px-6 dark:border-slate-700">
+        <BookOpen className="h-7 w-7 text-[#4A9B67] dark:text-[#67B084]" />
         <div>
-          <h1 className="text-base font-bold text-slate-900 dark:text-slate-100">Academic Hub</h1>
-          <p className="text-[10px] text-slate-500 leading-none dark:text-slate-400">Research & Teaching Dashboard</p>
+          <h1 className="font-mono text-base font-bold text-[#0066cc] dark:text-[#67B084]">Academic Hub</h1>
+          <p className="text-[10px] text-[var(--text-muted)] leading-none dark:text-slate-400">Research & Teaching Dashboard</p>
         </div>
       </div>
 
@@ -60,13 +60,13 @@ export function Sidebar({ onScreensaver }: SidebarProps) {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                  ? "bg-[#4A9B67] text-white shadow-sm dark:bg-[#4A9B67]"
+                  : "text-[var(--text-secondary)] hover:bg-[rgba(74,155,103,0.1)] hover:text-[#4A9B67] dark:text-slate-400 dark:hover:bg-[rgba(74,155,103,0.15)] dark:hover:text-[#67B084]"
               )}
             >
-              <item.icon className={cn("h-5 w-5", isActive ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400 dark:text-slate-500")} />
+              <item.icon className={cn("h-5 w-5", isActive ? "text-white" : "text-[var(--text-muted)] dark:text-slate-500")} />
               {item.name}
             </Link>
           );
@@ -74,17 +74,17 @@ export function Sidebar({ onScreensaver }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-slate-200 px-3 py-3 space-y-2 dark:border-slate-700">
+      <div className="border-t border-[var(--border)] px-3 py-3 space-y-2 dark:border-slate-700">
         {onScreensaver && (
           <button
             onClick={onScreensaver}
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[var(--text-muted)] hover:bg-[rgba(74,155,103,0.1)] hover:text-[#4A9B67] transition-all duration-200 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-[#67B084]"
           >
             <Monitor className="h-4 w-4" />
             Screensaver
           </button>
         )}
-        <p className="px-3 text-xs text-slate-400 dark:text-slate-500">Data stored locally on your machine</p>
+        <p className="px-3 text-xs font-mono text-[var(--text-muted)] dark:text-slate-500">Data stored locally on your machine</p>
       </div>
     </aside>
   );

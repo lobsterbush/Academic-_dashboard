@@ -16,7 +16,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Sidebar onScreensaver={forceIdle} />
-      <main className="ml-64 min-h-screen bg-slate-50 dark:bg-slate-950">
+      <main className="ml-64 min-h-screen bg-[var(--background)] dark:bg-[var(--background)]">
         {children}
       </main>
       {isIdle && <Screensaver onDismiss={wake} />}

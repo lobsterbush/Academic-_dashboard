@@ -59,10 +59,10 @@ const PAPER_COLUMNS = [
     icon: Pencil,
     stages: ["idea", "drafting", "internal-review"] as PaperStage[],
     headerBg:
-      "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800",
-    headerText: "text-indigo-700 dark:text-indigo-300",
+      "bg-[rgba(74,155,103,0.1)] dark:bg-[rgba(74,155,103,0.15)] border-[#4A9B67]/30 dark:border-[#67B084]/30",
+    headerText: "text-[#4A9B67] dark:text-[#67B084]",
     countBg:
-      "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
+      "bg-[#4A9B67] text-white dark:bg-[#67B084] dark:text-slate-900",
   },
   {
     key: "review" as const,
@@ -71,10 +71,10 @@ const PAPER_COLUMNS = [
     icon: Send,
     stages: ["submitted", "under-review"] as PaperStage[],
     headerBg:
-      "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800",
-    headerText: "text-amber-700 dark:text-amber-300",
+      "bg-[rgba(0,102,204,0.08)] dark:bg-[rgba(0,102,204,0.12)] border-[#0066cc]/30 dark:border-[#0066cc]/30",
+    headerText: "text-[#0066cc] dark:text-blue-400",
     countBg:
-      "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
+      "bg-[#0066cc] text-white dark:bg-blue-600 dark:text-white",
   },
   {
     key: "rr" as const,
@@ -83,10 +83,10 @@ const PAPER_COLUMNS = [
     icon: RotateCcw,
     stages: ["revise-resubmit"] as PaperStage[],
     headerBg:
-      "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800",
-    headerText: "text-rose-700 dark:text-rose-300",
+      "bg-amber-50/80 dark:bg-amber-950/40 border-amber-300/50 dark:border-amber-700/50",
+    headerText: "text-amber-700 dark:text-amber-400",
     countBg:
-      "bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300",
+      "bg-amber-500 text-white dark:bg-amber-600 dark:text-white",
   },
 ];
 
@@ -334,8 +334,8 @@ function AddTodoInput({ onAdd }: { onAdd: (text: string) => void }) {
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white/50 px-3 py-2 dark:border-slate-600 dark:bg-slate-800/50">
-      <Plus className="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" />
+    <div className="flex items-center gap-2 rounded-lg border border-dashed border-[#4A9B67]/40 bg-white/50 px-3 py-2 dark:border-[#67B084]/40 dark:bg-slate-800/50">
+      <Plus className="h-4 w-4 shrink-0 text-[#4A9B67] dark:text-[#67B084]" />
       <input
         ref={inputRef}
         type="text"
@@ -343,12 +343,12 @@ function AddTodoInput({ onAdd }: { onAdd: (text: string) => void }) {
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Add a to-do..."
-        className="flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-200 dark:placeholder:text-slate-500"
+        className="flex-1 bg-transparent text-sm text-[var(--foreground)] placeholder:text-[var(--text-muted)] focus:outline-none dark:text-slate-200 dark:placeholder:text-slate-500"
       />
       {value.trim() && (
         <button
           onClick={handleSubmit}
-          className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+          className="text-xs font-medium text-[#4A9B67] hover:text-[#67B084] dark:text-[#67B084] dark:hover:text-[#4A9B67]"
         >
           Add
         </button>
@@ -483,7 +483,7 @@ export default function DashboardPage() {
         action={
           <button
             onClick={() => setIsMagicImportOpen(true)}
-            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+            className="flex items-center gap-2 rounded-lg bg-[#4A9B67] px-4 py-2 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-[#67B084] hover:shadow-lg hover:-translate-y-0.5 dark:bg-[#4A9B67] dark:hover:bg-[#67B084]"
           >
             <Sparkles className="h-4 w-4" />
             <span>Magic Import</span>
@@ -567,9 +567,9 @@ export default function DashboardPage() {
               description="Events on your calendar"
               icon={Plane}
               count={upcomingConferences.length}
-              headerBg="bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-800"
-              headerText="text-sky-700 dark:text-sky-300"
-              countBg="bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300"
+              headerBg="bg-[rgba(0,102,204,0.08)] dark:bg-[rgba(0,102,204,0.12)] border-[#0066cc]/30 dark:border-[#0066cc]/30"
+              headerText="text-[#0066cc] dark:text-blue-400"
+              countBg="bg-[#0066cc] text-white dark:bg-blue-600 dark:text-white"
               emptyIcon={Plane}
               emptyText="No upcoming conferences"
             >
@@ -587,9 +587,9 @@ export default function DashboardPage() {
               description="Active advisees needing attention"
               icon={Users}
               count={activeStudents.length}
-              headerBg="bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800"
-              headerText="text-emerald-700 dark:text-emerald-300"
-              countBg="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300"
+              headerBg="bg-[rgba(74,155,103,0.1)] dark:bg-[rgba(74,155,103,0.15)] border-[#4A9B67]/30 dark:border-[#67B084]/30"
+              headerText="text-[#4A9B67] dark:text-[#67B084]"
+              countBg="bg-[#4A9B67] text-white dark:bg-[#67B084] dark:text-slate-900"
               emptyIcon={Users}
               emptyText="No active advisees"
             >
@@ -607,9 +607,9 @@ export default function DashboardPage() {
               description="Manuscripts awaiting your report"
               icon={ClipboardCheck}
               count={pendingReviews.length}
-              headerBg="bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800"
-              headerText="text-amber-700 dark:text-amber-300"
-              countBg="bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
+              headerBg="bg-amber-50/80 dark:bg-amber-950/40 border-amber-300/50 dark:border-amber-700/50"
+              headerText="text-amber-700 dark:text-amber-400"
+              countBg="bg-amber-500 text-white dark:bg-amber-600 dark:text-white"
               emptyIcon={ClipboardCheck}
               emptyText="No pending reviews"
             >
@@ -631,9 +631,9 @@ export default function DashboardPage() {
               description="Active awards & deliverables"
               icon={DollarSign}
               count={activeGrants.length}
-              headerBg="bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800"
-              headerText="text-blue-700 dark:text-blue-300"
-              countBg="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+              headerBg="bg-[rgba(0,102,204,0.08)] dark:bg-[rgba(0,102,204,0.12)] border-[#0066cc]/30 dark:border-[#0066cc]/30"
+              headerText="text-[#0066cc] dark:text-blue-400"
+              countBg="bg-[#0066cc] text-white dark:bg-blue-600 dark:text-white"
               emptyIcon={DollarSign}
               emptyText="No active grants"
             >
@@ -655,9 +655,9 @@ export default function DashboardPage() {
               description="Currently active courses"
               icon={BookOpen}
               count={activeCourses.length}
-              headerBg="bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800"
-              headerText="text-indigo-700 dark:text-indigo-300"
-              countBg="bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300"
+              headerBg="bg-[rgba(74,155,103,0.1)] dark:bg-[rgba(74,155,103,0.15)] border-[#4A9B67]/30 dark:border-[#67B084]/30"
+              headerText="text-[#4A9B67] dark:text-[#67B084]"
+              countBg="bg-[#4A9B67] text-white dark:bg-[#67B084] dark:text-slate-900"
               emptyIcon={BookOpen}
               emptyText="No active courses"
             >
@@ -678,9 +678,9 @@ export default function DashboardPage() {
               description="Miscellaneous tasks"
               icon={ListTodo}
               count={incompleteTodos.length}
-              headerBg="bg-violet-50 dark:bg-violet-950/40 border-violet-200 dark:border-violet-800"
-              headerText="text-violet-700 dark:text-violet-300"
-              countBg="bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300"
+              headerBg="bg-[rgba(0,102,204,0.08)] dark:bg-[rgba(0,102,204,0.12)] border-[#0066cc]/30 dark:border-[#0066cc]/30"
+              headerText="text-[#0066cc] dark:text-blue-400"
+              countBg="bg-[#0066cc] text-white dark:bg-blue-600 dark:text-white"
               emptyIcon={ListTodo}
               emptyText="All clear!"
             >
